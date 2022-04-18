@@ -4,7 +4,6 @@
 
 echo "Starting..."
 # sudo mkdir -m 0755 /nix && chown root /nix
-
 sleep 1
 # intstall nix-unstable with flake support
 # sh <(curl -L https://nixos.org/nix/install) --no-daemon
@@ -19,7 +18,7 @@ sleep 1
 source ./.bashrc
 reset
 
-# #install git onto nix profile
+# #install git
 sleep 1
 echo "installing git..."
 sudo apt-get update

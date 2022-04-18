@@ -1,0 +1,24 @@
+name: terraform destroy
+
+on: workflow_dispatch
+
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v1.2.1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      
+      - name: Terraform Initiallise
+        id: init
+        run: terraform init
+
+      - name: Terraform destroy
+        id: destroy
+        run: terraform destroy -auto-approve
