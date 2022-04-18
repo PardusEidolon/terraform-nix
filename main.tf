@@ -72,7 +72,7 @@ resource "aws_instance" "ec2_instance" {
     type        = "ssh"
     host        = self.public_ip
     user        = "ubuntu"
-    private_key = file("~/.ssh/id_ed25519")
+#     private_key = file("~/.ssh/id_ed25519")
     timeout     = "3m"
   }
   tags = local.tags
