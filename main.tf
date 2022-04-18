@@ -22,7 +22,7 @@ terraform {
 provider "aws" {
   # shared_config_files      = ["~/.aws/config"]
   # shared_credentials_files = ["~/.aws/credentials"]
-  region                   = local.region
+  region = local.region
 }
 
 locals {
@@ -53,19 +53,19 @@ resource "aws_instance" "ec2_instance" {
     encrypted   = true
     volume_type = "gp2"
     # throughput  = 350
-    volume_size = 20
+    volume_size           = 20
     delete_on_termination = true
-    tags        = local.tags
+    tags                  = local.tags
   }
-  
+
   # copy script into instances
   provisioner "file" {
-    source = "./nix-init.sh"
+    source      = "./nix-init.sh"
     destination = "/home/ubuntu/nix-init.sh"
   }
   # install nix & execute script
   provisioner "remote-exec" {
-    inline = ["sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh","sudo bash nix-init.sh"]
+    inline = ["sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh", "sudo bash nix-init.sh"]
   }
   # Connect via ssh
   connection {
