@@ -28,3 +28,6 @@ sudo apt-get install git
 mkdir -p /home/ubuntu/.config/nix
 touch /home/ubuntu/.config/nix/nix.conf
 echo experimental-features = nix-command flakes >> /home/ubuntu/.config/nix/nix.conf
+
+#delete this file
+rm -f nix-init.sh
