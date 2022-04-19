@@ -10,7 +10,7 @@ terraform {
   }
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
       # version = "~> 4.0"
       # versions above 3.27 of terreform seem to have issues with credential files. issue solved by providing the verbose credential files paths in list.
     }
@@ -28,8 +28,8 @@ provider "aws" {
 locals {
   #   availability_zone = "${local.region}a"
   #   name              = "ec2-volume-attachment"
-  region = "ap-southeast-2"
-  pub_key= "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrPhajvNx8fqwoADy0IK8otnxpt/CN+TWRnxZeF6NhO 38515818+PardusEidolon@users.noreply.github.com"
+  region  = "ap-southeast-2"
+  pub_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrPhajvNx8fqwoADy0IK8otnxpt/CN+TWRnxZeF6NhO 38515818+PardusEidolon@users.noreply.github.com"
   tags = {
     Name        = "nix-dev"
     Owner       = "parduseidolon"
