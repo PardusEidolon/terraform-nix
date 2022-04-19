@@ -1,0 +1,27 @@
+name: ssh remote commands
+
+on: 
+#   push:
+#     branches:
+#       - master
+  # pull_request:
+  workflow_dispatch:
+  
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+
+        - name: SSH Remote Commands
+          uses: appleboy/ssh-action@v0.1.4
+          with:
+              host: ubuntu@ec2-54-206-118-148.ap-southeast-2.compute.amazonaws.com
+              key: ${{ secrets.KEY }}
+              username: ubuntu
+              port: 22
+              script: |
+                  echo "hello, world!"
+                  ls -al
