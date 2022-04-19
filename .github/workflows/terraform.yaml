@@ -38,6 +38,11 @@ jobs:
       - name: Terraform output
         run: terraform output
       
+      - name: Store Public ip 
+        id: ipV4adrr
+        run: |
+            ipAddress=$(terraform output | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' )
+            echo "::set-output name=publicIP::$ipAddress"
 
-
-
+      - name: Cat test
+        run: echo ${{steps.ipV4adrr.outputs.publicIP}}

@@ -24,6 +24,7 @@ jobs:
 #             port: 22
 #             source: "nix-init.sh"
 #             target: "/home/ubuntu"
+        
         - name: SSH Remote Commands
           uses: appleboy/ssh-action@v0.1.4
           with:
@@ -32,5 +33,6 @@ jobs:
               username: ubuntu
               port: 22
               script: |
+                  sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh
                   sudo bash nix-init.sh
-#                  sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh
+
