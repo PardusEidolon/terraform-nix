@@ -41,6 +41,13 @@ jobs:
       # - name: SSH Remote Commands
       #   uses: appleboy/ssh-action@v0.1.4
       #   with:
+              # host: ubuntu@ec2-<public ipV4_here>.ap-southeast-2.compute.amazonaws.com
+              # key: ${{ secrets.KEY }}
+              # username: ubuntu
+              # port: 22
+              # script: |
+                  # echo "hello, world!"
+                  # ls -al
 
 
 
