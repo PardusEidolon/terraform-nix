@@ -15,16 +15,15 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v3
         
-        - name: SCP Files
-          uses: appleboy/scp-action@v0.0.1
+        - name: copy file via ssh password
+          uses: appleboy/scp-action@master
           with:
-              host: ec2-54-206-118-148.ap-southeast-2.compute.amazonaws.com
-              key: ${{ secrets.KEY }}
-              username: ubuntu
-              port: 22
-              source: "nix-init.sh"
-              target: "/home/ubuntu"
-
+            host: ec2-54-206-118-148.ap-southeast-2.compute.amazonaws.com
+            username: ubuntu
+            key: ${{ secrets.KEY }}
+            port: ${{ secrets.PORT }}
+            source: "nix-init.sh"
+            target: "/home/ubuntu"
 #         - name: SSH Remote Commands
 #           uses: appleboy/ssh-action@v0.1.4
 #           with:
