@@ -23,6 +23,7 @@ sleep 1
 echo "installing git..."
 sudo apt-get update
 sudo apt-get install git
+git version
 
 #enable nix-flake support
 mkdir -p /home/ubuntu/.config/nix
