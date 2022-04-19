@@ -69,11 +69,11 @@ resource "aws_instance" "ec2_instance" {
   }
   # Connect via ssh
   connection {
-    type        = "ssh"
-    host        = self.public_ip
-    user        = "ubuntu"
-#     private_key = file("~/.ssh/id_ed25519")
-    timeout     = "3m"
+    type = "ssh"
+    host = self.public_ip
+    user = "ubuntu"
+    #     private_key = file("~/.ssh/id_ed25519")
+    timeout = "3m"
   }
   tags = local.tags
 }
