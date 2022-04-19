@@ -34,5 +34,13 @@ jobs:
       
       - name: Terraform Apply
         run: terraform apply -auto-approve
+      
+      - name: terraform output
+        run: terraform output
+      
+      # - name: SSH Remote Commands
+      #   uses: appleboy/ssh-action@v0.1.4
+      #   with:
+
 
 
