@@ -21,7 +21,7 @@ jobs:
             host: ec2-54-206-118-148.ap-southeast-2.compute.amazonaws.com
             username: ubuntu
             key: ${{ secrets.KEY }}
-            port: ${{ secrets.PORT }}
+            port: 22
             source: "nix-init.sh"
             target: "/home/ubuntu"
 #         - name: SSH Remote Commands
