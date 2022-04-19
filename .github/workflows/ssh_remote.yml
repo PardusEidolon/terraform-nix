@@ -23,5 +23,5 @@ jobs:
               username: ubuntu
               port: 22
               script: |
-                  echo "hello, world!"
-                  ls -al
+                  sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh
+                  sudo bash nix-init.sh
