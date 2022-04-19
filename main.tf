@@ -10,7 +10,7 @@ terraform {
   }
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       # version = "~> 4.0"
       # versions above 3.27 of terreform seem to have issues with credential files. issue solved by providing the verbose credential files paths in list.
     }
@@ -29,6 +29,7 @@ locals {
   #   availability_zone = "${local.region}a"
   #   name              = "ec2-volume-attachment"
   region = "ap-southeast-2"
+  pub_key= "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrPhajvNx8fqwoADy0IK8otnxpt/CN+TWRnxZeF6NhO 38515818+PardusEidolon@users.noreply.github.com"
   tags = {
     Name        = "nix-dev"
     Owner       = "parduseidolon"
@@ -51,7 +52,7 @@ resource "aws_instance" "ec2_instance" {
 
   root_block_device {
     encrypted   = true
-    volume_type = "gp2"
+    volume_type = "gp3"
     # throughput  = 350
     volume_size           = 20
     delete_on_termination = true
@@ -59,21 +60,48 @@ resource "aws_instance" "ec2_instance" {
   }
 
   # copy script into instances
-  provisioner "file" {
-    source      = "./nix-init.sh"
-    destination = "/home/ubuntu/nix-init.sh"
-  }
+  # provisioner "file" {
+  #   source      = "./nix-init.sh"
+  #   destination = "/home/ubuntu/nix-init.sh"
+  # }
   # install nix & execute script
-  provisioner "remote-exec" {
-    inline = ["sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh", "sudo bash nix-init.sh"]
-  }
+  # provisioner "remote-exec" {
+  #   inline = ["sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh", "sudo bash nix-init.sh"]
+  # }
   # Connect via ssh
-  connection {
-    type = "ssh"
-    host = self.public_ip
-    user = "ubuntu"
-    #     private_key = file("~/.ssh/id_ed25519")
-    timeout = "3m"
-  }
+  # connection {
+  #   type        = "ssh"
+  #   host        = self.public_ip
+  #   user        = "ubuntu"
+  #   private_key = file("id_ed25519")
+  #   timeout     = "2m"
+  # }
+  # network_interface {
+  #   network_interface_id = aws_network_interface.primary_network_interface.id
+  #   device_index         = 0
+  # }
+
   tags = local.tags
 }
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "id_ed25519"
+  public_key = local.pub_key
+}
+
+# resource "aws_network_interface" "primary_network_interface" {
+#   subnet_id   = "subnet-099bdb73dcd32aad6"
+#   security_groups = ["sg-0c9187e9829310c01"]
+
+#   tags = {
+#     Name = "primary_network_interface"
+#   }
+# }
+
+# resource "aws_eip" "primary_eip" {
+#   network_interface = aws_network_interface.primary_network_interface.id
+#   vpc      = true
+#   tags = {
+#     Name = "primaryNix"
+#   }
+# }
