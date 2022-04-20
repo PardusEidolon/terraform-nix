@@ -84,6 +84,7 @@ resource "aws_instance" "ec2_instance" {
   tags = local.tags
 }
 
+# deploy key pair
 resource "aws_key_pair" "deployer" {
   key_name   = "id_ed25519"
   public_key = local.pub_key
