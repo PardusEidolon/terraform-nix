@@ -1,0 +1,206 @@
+= Terraform Nix
+:toc:
+:author: @PardusEidolon
+:email: jack@yumi.ai
+:imagesdir: images
+:source-highlighter: highlight.js
+:highlightjs-theme: atom-one-dark
+:description: A repository for deploying \
+configured nix instance on the aws platform using \
+github actions and terraform.
+:url-repo: https://github.com/PardusEidolon/terraform-nix
+:url-hashiCorpGit: https://learn.hashicorp.com/tutorials/terraform/automate-terraform?in=terraform/automation
+:url-terraform: https://cloud.hashicorp.com/products/terraform
+
+== Introduction
+_{description}_
+
+The aim of this repository is to be a template that can be used for deploying nix instances on aws. Development enviroments should be spun up with nix configured to build out shells for software development and testing enviroments such as running notebooks for example. You could probably set this up to use containers instead.
+
+Below you will find documentation on the process of this repository.
+
+== What does it do?
+
+The repository is a simple terraform infrastructure file that spins up a simple ubuntu ec2 instance on aws, that's all it does at it's core. The additions are resource blocks that add storage, SSH key deployment. SSH remote commands for installing Nix are installed as a seperate command becuase of the permissions the script has compared to git which are automated via the shell script. The script is also for adding in variables and enabling nix flake support. 
+
+The Deployment and desctruction are all managed by the github actions workflow files one for deploying and the other for destroying. I currently have it set for manual depolyment but can be set for smoke runs on pull requests as a comment, An example of this already exists on {url-hashiCorpGit}[HashiCorp Learn].
+
+== Hasicorp workspace
+First, you will need to create a new workspace for this to work under the `API-driven workflow`. You can sign up for free {url-terraform}[here]
+
+image::new_workspace.PNG[]
+
+Using this workflow will require you to add the enviroment variables such as your IAM profile `Access Key` & `Access ID` set to `Sensitive` for the workspace to enable ec2 deployments.
+
+You will need to add an IAM user role with `AdministratorAccess` from there make sure to copy and secure those credientials somewhere safe.
+
+=== Deploy workspace from file
+If you wish to add a workspace all from within the file itself you can set the following below.
+
+[source, yaml]
+----
+terraform {
+  cloud {
+    organization = "<example org>"
+    workspaces {
+      name = "<example workspace name>"
+    }
+  }
+----
+
+Add this block to the top of your terraform file.
+
+[source, yaml]
+----
+provider "aws" {
+  shared_config_files      = ["~/.aws/config"] <1>
+  shared_credentials_files = ["~/.aws/credentials"] <2>
+  region = ap-southeast-2 <3>
+}
+----
+<1> The path to your aws configuration file default location as shown above.
+<2> The path to your aws credentials file.
+
+This should be enough for Hashi-corp to have your aws credentials in scope for depolying instances.
+
+[NOTE]
+I've had trouble getting this working, However It is worth figuring out. I would stick to the first workflow for now.
+
+== Repository Secrets
+When using this repository for your own deployments you need to make sure the repository has 2 secrets in scope:
+
+- `TF_API_TOKEN`: _This is your terraform api token key_
+- `KEY`:  _This is your private SSH key_
+
+There are probably far better practices that secure your credentials far better than the method here. But this is the one I came up with. Post any issue if you have a better ideas you would like to contribute.
+
+== SSH
+Your SSH is only ever available when the infrastructure is deployed , its deleted when it's terminated. Make sure to add your public key into the local variables section in the main terraform file.
+
+[source,yaml]
+----
+locals {
+  #   availability_zone = "${local.region}a"
+  #   name              = "ec2-volume-attachment"
+  region  = "<Region here>"
+  pub_key = "<Your SSH public key here>"
+  tags = {
+    Name        = "<Name of the instance>"
+    Owner       = "<Owner tag>"
+    Environment = "<Enviroment tag>"
+  }
+}
+----
+
+== Action Workflow's
+There are two workflows that are in the scope of the repository. `terraform_deploy` and `terraform_destroy`.
+
+=== Terraform Deploy
+The depoly file is currently set up to work on manual dispatches. Again as mentioned earlier you can make it run tests with on a pull request for example.
+
+It's starts of using the hashi-corp github action for formatting, validifaction and deployment.
+
+[source, yaml]
+----
+name: terraform infrastructure
+
+on: 
+#   push:
+#     branches:
+#       - master
+  # pull_request:
+  workflow_dispatch:
+  
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.0
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+      
+      - name: Terraform Initiallise
+        id: init
+        run: terraform init
+        
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+----
+
+I have a file in the root of the directory for outputs which I use to store the public ip as a host for the remote SSH connect commands action to function and install the necessary packages onto the instance.
+
+[source,yaml]
+----
+      - name: Store Public ip 
+        id: ipV4adrr
+        run: |
+            ipAddress=$(terraform output | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' ) <1>
+            echo "::set-output name=publicIP::$ipAddress" <2>
+            
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@master
+        with:
+            host: ${{steps.ipV4adrr.outputs.publicIP}}
+            username: ubuntu
+            key: ${{ secrets.KEY }}
+            port: 22
+            source: "nix-init.sh"
+            target: "/home/ubuntu"
+      
+      - name: SSH Remote Commands
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+              host: ${{steps.ipV4adrr.outputs.publicIP}}
+              key: ${{ secrets.KEY }}
+              username: ubuntu
+              port: 22
+              script: |
+                  sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh
+                  sudo bash nix-init.sh
+----
+<1> I use grep to store the public ip from the terraform outputfile into the output public ip
+<2> Using the public ip output variable as the host input.
+
+The second half transfers files in the root of the repository into the target instance then is executed in the remote execution.
+
+=== Terraform Destory
+
+This is self-explanitory, by running the workflow you destory the instance and everthing deployed in it.
+
+[source,yaml]
+----
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v1.2.1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      
+      - name: Terraform Initiallise
+        id: init
+        run: terraform init
+
+      - name: Terraform destroy
+        id: destroy
+        run: terraform destroy -auto-approve
+----
