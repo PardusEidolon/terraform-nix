@@ -43,7 +43,7 @@ locals {
 resource "aws_instance" "ec2_instance" {
   ami                         = "ami-0b7dcd6e6fd797935" # Ubuntu Server 20.04 LTS
   instance_type               = "t2.micro"
-  key_name                    = "id_ed25519"
+  key_name                    = "deployer_key"
   monitoring                  = true
   vpc_security_group_ids      = ["sg-0c9187e9829310c01"]
   subnet_id                   = "subnet-099bdb73dcd32aad6"
@@ -86,7 +86,7 @@ resource "aws_instance" "ec2_instance" {
 
 # deploy key pair
 resource "aws_key_pair" "deployer" {
-  key_name   = "id_ed25519"
+  key_name   = "deployer_key"
   public_key = local.pub_key
 }
 
