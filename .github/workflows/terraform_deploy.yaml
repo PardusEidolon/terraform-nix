@@ -20,27 +20,32 @@ jobs:
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
       
-#       - name: Terraform Format
-#         id: fmt
-#         run: terraform fmt -check
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
       
       - name: Terraform Initiallise
         id: init
         run: terraform init
         
-#       - name: Terraform Validate
-#         id: validate
-#         run: terraform validate
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
       
-#       - name: Terraform Apply
-#         run: terraform apply -auto-approve
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+      
+      - name: instance intialisation
+        run: sleep 10
+        shell: bash
+      
       
       - name: Store Public ip 
         id: ipV4adrr
         run: |
             ipAddress=$(terraform output | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' )
-            echo "::set-output name=publicIP::$ipAddress"
-            
+            echo "::set-output name=publicIP::$ipAddress"      
+      
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
         with:
