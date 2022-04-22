@@ -64,5 +64,5 @@ jobs:
               username: ubuntu
               port: 22
               script: |
-                  sudo curl https://nixos.org/releases/nix/nix-2.7.0/install | sh
+                  sudo curl -L https://nixos.org/nix/install | sh
                   sudo bash nix-init.sh
